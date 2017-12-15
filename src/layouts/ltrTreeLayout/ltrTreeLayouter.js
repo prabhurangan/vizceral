@@ -47,7 +47,6 @@ const weightSort = function (a, b) {
       nodesSortedByDepth = nodesSortedByDepth.reduce((a, n) => { a.push(n); return a; }, []);
 
       const maxNodesPerDepth = 30;
-      console.log('******maxnodes depth: ', maxNodesPerDepth);
       for (let i = 0; i < nodesSortedByDepth.length; i++) {
         const nodesInDepth = nodesSortedByDepth[i];
         if (nodesInDepth.length > maxNodesPerDepth) {
@@ -78,7 +77,7 @@ const weightSort = function (a, b) {
       }
     }
 
-    function positionNodes (nodesSortedByDepth, dimensions) {
+    function positionNodesByTTBLayout (nodesSortedByDepth, dimensions) {
       const nodePositions = {};
       let lastXDelta = 0;
       let xOffset = 0;
@@ -86,7 +85,6 @@ const weightSort = function (a, b) {
       function setPositions (row, nodesAtDepth, yDelta) {
         const curYDelta = yDelta * row;
         const xDelta = dimensions.width / (nodesAtDepth.length + 1);
-        console.log(`${curYDelta}    xdelta: ${xDelta}`);
         const needsXOffset = xDelta < lastXDelta ? lastXDelta % xDelta < 1 : xDelta % lastXDelta < 1;
         if (needsXOffset) { xOffset = -xOffset; }
 
@@ -97,18 +95,47 @@ const weightSort = function (a, b) {
 
         lastXDelta = xDelta;
       }
-      console.log(`${dimensions.width}  height:  ${dimensions.height}`);
       let yDelta;
       if (nodesSortedByDepth.length === 1) {
         yDelta = dimensions.height / 2;
         setPositions(1, nodesSortedByDepth[0], yDelta);
       } else {
         yDelta = dimensions.height / (nodesSortedByDepth.length - 1);
-        console.log(`length: ${nodesSortedByDepth.length}`);
         const nodeLength = nodesSortedByDepth.length - 1;
         for (let i = 0; i < nodesSortedByDepth.length; i++) {
-          console.log(`${i} yDelta: ${yDelta}`);
-          console.log(`length2: ${nodesSortedByDepth[i].length}`);
+          setPositions(nodeLength - i, nodesSortedByDepth[i], yDelta);
+        }
+      }
+
+      return nodePositions;
+    }
+
+    function positionNodesByLTRLayout (nodesSortedByDepth, dimensions) {
+      const nodePositions = {};
+      let lastXDelta = 0;
+      let xOffset = 0;
+
+      function setPositions (row, nodesAtDepth, yDelta) {
+        const curYDelta = yDelta * row;
+        const xDelta = dimensions.width / (nodesAtDepth.length + 1);
+        const needsXOffset = xDelta < lastXDelta ? lastXDelta % xDelta < 1 : xDelta % lastXDelta < 1;
+        if (needsXOffset) { xOffset = -xOffset; }
+
+        for (let j = 0; j < nodesAtDepth.length; j++) {
+          const curXDelta = (xDelta * (j + 1)) + (needsXOffset ? xOffset : 0);
+          nodePositions[nodesAtDepth[j].name] = { y: curYDelta, x: curXDelta };
+        }
+
+        lastXDelta = xDelta;
+      }
+      let yDelta;
+      if (nodesSortedByDepth.length === 1) {
+        yDelta = dimensions.height / 2;
+        setPositions(1, nodesSortedByDepth[0], yDelta);
+      } else {
+        yDelta = dimensions.height / (nodesSortedByDepth.length - 1);
+        const nodeLength = nodesSortedByDepth.length - 1;
+        for (let i = 0; i < nodesSortedByDepth.length; i++) {
           setPositions(nodeLength - i, nodesSortedByDepth[i], yDelta);
         }
       }
@@ -135,7 +162,11 @@ const weightSort = function (a, b) {
 
       const nodesSortedByDepth = sortNodesByDepth(graph);
       sortNodesWithinDepth(nodesSortedByDepth);
-      const nodePositions = positionNodes(nodesSortedByDepth, data.dimensions);
+      if(userDefinedLayout == 'ltr') {
+        const nodePositions = positionNodesByLTRLayout(nodesSortedByDepth, data.dimensions);
+      } else if(userDefinedLayout == 'ttb') {
+        const nodePositions = positionNodesByTTBLayout(nodesSortedByDepth, data.dimensions); 
+      }
       return nodePositions;
     };
 
