@@ -47,6 +47,7 @@ const weightSort = function (a, b) {
       nodesSortedByDepth = nodesSortedByDepth.reduce((a, n) => { a.push(n); return a; }, []);
 
       const maxNodesPerDepth = 30;
+      console.log('******maxnodes depth: ', maxNodesPerDepth);
       for (let i = 0; i < nodesSortedByDepth.length; i++) {
         const nodesInDepth = nodesSortedByDepth[i];
         if (nodesInDepth.length > maxNodesPerDepth) {
@@ -78,32 +79,38 @@ const weightSort = function (a, b) {
     }
 
     function positionNodes (nodesSortedByDepth, dimensions) {
+     
       const nodePositions = {};
-      let lastYDelta = 0;
-      let yOffset = -35;
+      let lastXDelta = 0;
+      let xOffset = 0;
 
-      function setPositions (column, nodesAtDepth, xDelta) {
-        const curXDelta = xDelta * column;
-        const yDelta = dimensions.height / (nodesAtDepth.length + 1);
-        const needsYOffset = yDelta < lastYDelta ? lastYDelta % yDelta < 1 : yDelta % lastYDelta < 1;
-        if (needsYOffset) { yOffset = -yOffset; }
+      function setPositions (row, nodesAtDepth, yDelta) {
+        const curYDelta = yDelta * row;
+        const xDelta = dimensions.width / (nodesAtDepth.length + 1);
+        console.log(`${curYDelta}    xdelta: ${xDelta}`);
+        const needsXOffset = xDelta < lastXDelta ? lastXDelta % xDelta < 1 : xDelta % lastXDelta < 1;
+        if (needsXOffset) { xOffset = -xOffset; }
 
         for (let j = 0; j < nodesAtDepth.length; j++) {
-          const curYDelta = (yDelta * (j + 1)) + (needsYOffset ? yOffset : 0);
-          nodePositions[nodesAtDepth[j].name] = { x: curXDelta, y: curYDelta };
+          const curXDelta = (xDelta * (j + 1)) + (needsXOffset ? xOffset : 0);
+          nodePositions[nodesAtDepth[j].name] = { y: curYDelta, x: curXDelta };
         }
 
-        lastYDelta = yDelta;
+        lastXDelta = xDelta;
       }
-
-      let xDelta;
+      console.log(`${dimensions.width}  height:  ${dimensions.height}`);
+      let yDelta;
       if (nodesSortedByDepth.length === 1) {
-        xDelta = dimensions.width / 2;
-        setPositions(1, nodesSortedByDepth[0], xDelta);
+        yDelta = dimensions.height / 2;
+        setPositions(1, nodesSortedByDepth[0], yDelta);
       } else {
-        xDelta = dimensions.width / (nodesSortedByDepth.length - 1);
+        yDelta = dimensions.height / (nodesSortedByDepth.length - 1);
+        console.log(`length: ${nodesSortedByDepth.length}`);
+        let nodeLength = nodesSortedByDepth.length - 1;
         for (let i = 0; i < nodesSortedByDepth.length; i++) {
-          setPositions(i, nodesSortedByDepth[i], xDelta);
+          console.log(`${i} yDelta: ${yDelta}`);
+          console.log(`length2: ${nodesSortedByDepth[i].length}`);
+          setPositions(nodeLength - i, nodesSortedByDepth[i], yDelta);
         }
       }
 
