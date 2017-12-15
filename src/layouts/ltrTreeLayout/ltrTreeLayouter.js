@@ -79,7 +79,6 @@ const weightSort = function (a, b) {
     }
 
     function positionNodes (nodesSortedByDepth, dimensions) {
-     
       const nodePositions = {};
       let lastXDelta = 0;
       let xOffset = 0;
@@ -106,7 +105,7 @@ const weightSort = function (a, b) {
       } else {
         yDelta = dimensions.height / (nodesSortedByDepth.length - 1);
         console.log(`length: ${nodesSortedByDepth.length}`);
-        let nodeLength = nodesSortedByDepth.length - 1;
+        const nodeLength = nodesSortedByDepth.length - 1;
         for (let i = 0; i < nodesSortedByDepth.length; i++) {
           console.log(`${i} yDelta: ${yDelta}`);
           console.log(`length2: ${nodesSortedByDepth[i].length}`);
