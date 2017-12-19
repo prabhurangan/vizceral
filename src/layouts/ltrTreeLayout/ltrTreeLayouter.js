@@ -77,7 +77,7 @@ const weightSort = function (a, b) {
       }
     }
 
-    function positionNodesByTTBLayout (nodesSortedByDepth, dimensions) {
+    function positionNodes (nodesSortedByDepth, dimensions) {
       const nodePositions = {};
       let lastXDelta = 0;
       let xOffset = 0;
@@ -87,45 +87,10 @@ const weightSort = function (a, b) {
         const xDelta = dimensions.width / (nodesAtDepth.length + 1);
         const needsXOffset = xDelta < lastXDelta ? lastXDelta % xDelta < 1 : xDelta % lastXDelta < 1;
         if (needsXOffset) { xOffset = -xOffset; }
-
         for (let j = 0; j < nodesAtDepth.length; j++) {
           const curXDelta = (xDelta * (j + 1)) + (needsXOffset ? xOffset : 0);
           nodePositions[nodesAtDepth[j].name] = { y: curYDelta, x: curXDelta };
         }
-
-        lastXDelta = xDelta;
-      }
-      let yDelta;
-      if (nodesSortedByDepth.length === 1) {
-        yDelta = dimensions.height / 2;
-        setPositions(1, nodesSortedByDepth[0], yDelta);
-      } else {
-        yDelta = dimensions.height / (nodesSortedByDepth.length - 1);
-        const nodeLength = nodesSortedByDepth.length - 1;
-        for (let i = 0; i < nodesSortedByDepth.length; i++) {
-          setPositions(nodeLength - i, nodesSortedByDepth[i], yDelta);
-        }
-      }
-
-      return nodePositions;
-    }
-
-    function positionNodesByLTRLayout (nodesSortedByDepth, dimensions) {
-      const nodePositions = {};
-      let lastXDelta = 0;
-      let xOffset = 0;
-
-      function setPositions (row, nodesAtDepth, yDelta) {
-        const curYDelta = yDelta * row;
-        const xDelta = dimensions.width / (nodesAtDepth.length + 1);
-        const needsXOffset = xDelta < lastXDelta ? lastXDelta % xDelta < 1 : xDelta % lastXDelta < 1;
-        if (needsXOffset) { xOffset = -xOffset; }
-
-        for (let j = 0; j < nodesAtDepth.length; j++) {
-          const curXDelta = (xDelta * (j + 1)) + (needsXOffset ? xOffset : 0);
-          nodePositions[nodesAtDepth[j].name] = { y: curYDelta, x: curXDelta };
-        }
-
         lastXDelta = xDelta;
       }
       let yDelta;
@@ -162,11 +127,7 @@ const weightSort = function (a, b) {
 
       const nodesSortedByDepth = sortNodesByDepth(graph);
       sortNodesWithinDepth(nodesSortedByDepth);
-      if(userDefinedLayout == 'ltr') {
-        const nodePositions = positionNodesByLTRLayout(nodesSortedByDepth, data.dimensions);
-      } else if(userDefinedLayout == 'ttb') {
-        const nodePositions = positionNodesByTTBLayout(nodesSortedByDepth, data.dimensions); 
-      }
+      const nodePositions = positionNodes(nodesSortedByDepth, data.dimensions);
       return nodePositions;
     };
 
